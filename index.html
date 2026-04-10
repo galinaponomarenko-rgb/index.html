@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Знижки для військових</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Unbounded:wght@400;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f0e;
+    --surface: #151917;
+    --card: #1c201e;
+    --card-hover: #222825;
+    --border: #2a2e2c;
+    --accent: #b8ff57;
+    --accent2: #57ffd8;
+    --text: #e8ede9;
+    --muted: #7a8c7d;
+    --badge-bg: #1e2b1f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #0d0f0e 0%, #111a10 60%, #0a1209 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(184,255,87,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--badge-bg);
+    border: 1px solid rgba(184,255,87,0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero-badge::before { content: '★'; font-size: 10px; }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Stats strip */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    flex: 1;
+    max-width: 180px;
+    padding: 16px 20px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Tabs */
+  .tabs-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,15,14,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'Manrope', sans-serif;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Content */
+  .content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .panel-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: rgba(184,255,87,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--badge-bg);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .discount-badge {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .discount-badge.free {
+    font-size: 14px;
+    color: var(--accent2);
+    background: rgba(87,255,216,0.08);
+    border: 1px solid rgba(87,255,216,0.2);
+    border-radius: 8px;
+    padding: 4px 10px;
+  }
+  .card-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .card-category {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  a.card { text-decoration: none; display: block; }
+  .card-link {
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.03em;
+  }
+
+  /* Search */
+  .search-wrap {
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 18px;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px 12px 42px;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: rgba(184,255,87,0.3); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    .stats { flex-wrap: wrap; }
+    .stat { min-width: 33%; border-bottom: 1px solid var(--border); }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Для захисників України</div>
+  <h1>Знижки для<br><span>Військових</span></h1>
+  <p>Підтримка від бізнесу — пільги та спеціальні пропозиції для ЗСУ та ветеранів</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">37+</div><div class="stat-label">Партнерів</div></div>
+  <div class="stat"><div class="stat-num">до 100%</div><div class="stat-label">Знижки</div></div>
+  <div class="stat"><div class="stat-num">7</div><div class="stat-label">Категорій</div></div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab active" data-tab="all">Всі</button>
+    <button class="tab" data-tab="health">Здоров'я</button>
+    <button class="tab" data-tab="sport">Спорт</button>
+    <button class="tab" data-tab="shop">Магазини</button>
+    <button class="tab" data-tab="beauty">Краса</button>
+    <button class="tab" data-tab="leisure">Дозвілля</button>
+    <button class="tab" data-tab="services">Послуги</button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="Пошук партнера або категорії..." id="searchInput">
+  </div>
+
+  <div class="tab-panel active" id="panel-all">
+    <div class="panel-title">Усі партнери — <span id="count-all">37</span></div>
+    <div class="grid" id="grid-all"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-health">
+    <div class="panel-title">Здоров'я та медицина</div>
+    <div class="grid" id="grid-health"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-sport">
+    <div class="panel-title">Спорт та туризм</div>
+    <div class="grid" id="grid-sport"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-shop">
+    <div class="panel-title">Магазини та техніка</div>
+    <div class="grid" id="grid-shop"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-beauty">
+    <div class="panel-title">Краса та догляд</div>
+    <div class="grid" id="grid-beauty"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-leisure">
+    <div class="panel-title">Дозвілля та культура</div>
+    <div class="grid" id="grid-leisure"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-services">
+    <div class="panel-title">Послуги</div>
+    <div class="grid" id="grid-services"></div>
+  </div>
+</div>
+
+<script>
+const discounts = [
+  { name: "Хімчистка Kims", discount: "Безкоштовно", category: "services", icon: "👕", note: "Чистка форми", url: "https://www.kims.com.ua/kyiv" },
+  { name: "Центр фізичної терапії Густава Цандера", discount: "50%", category: "health", icon: "🏥", url: "https://zander.kiev.ua/" },
+  { name: "Shiping Cars", discount: "50%", category: "services", icon: "🚗", note: "Автомобілі", url: "https://shippingcars.com.ua/" },
+  { name: "Київ йога центр", discount: "20%", category: "sport", icon: "🧘", url: "https://kyivyoga.center/" },
+  { name: "Invivo (Вишневе)", discount: "30%", category: "health", icon: "🔬", note: "Аналізи", url: "https://invivo.ua/uk/kiev/" },
+  { name: "Стомасвіт", discount: "50%", category: "health", icon: "🦷", note: "Стоматологія", url: "https://stomasvit.kiev.ua" },
+  { name: "Тактіка", discount: "10%", category: "shop", icon: "🔫", note: "Магазин зброї", url: "https://tactica.kiev.ua/" },
+  { name: "Terra incognita", discount: "10%", category: "sport", icon: "⛺", note: "Туристичне спорядження" },
+  { name: "Масаж студія Мова тіла", discount: "100%", category: "beauty", icon: "💆", url: "https://www.instagram.com/massage_movatila/" },
+  { name: "Всі привіти", discount: "20%", category: "shop", icon: "🛍️" },
+  { name: "Юск", discount: "5%", category: "services", icon: "⚖️" },
+  { name: "Комфі", discount: "5%", category: "shop", icon: "🖥️" },
+  { name: "Ніколаб", discount: "20%", category: "health", icon: "🔬", note: "Аналізи", url: "https://nikolab.com.ua/uk/" },
+  { name: "Добробут", discount: "20%", category: "health", icon: "🏥", url: "https://dobrobut.com/ua" },
+  { name: "Клініка Віва", discount: "30%", category: "health", icon: "🏥", url: "https://viva.clinic/ua/" },
+  { name: "Riot Division", discount: "50%", category: "shop", icon: "👗", url: "https://ua.riotdivision.tech/" },
+  { name: "Balls Barbershop", discount: "50%", category: "beauty", icon: "💈", note: "Барбершоп", url: "https://ballsbarbershop.com.ua/" },
+  { name: "Книгарня Старого лева", discount: "20%", category: "leisure", icon: "📚" },
+  { name: "Планета кіно", discount: "20%", category: "leisure", icon: "🎬" },
+  { name: "Дніпро-М", discount: "20%", category: "shop", icon: "🔧" },
+  { name: "Спортзал Аполло", discount: "63%", category: "sport", icon: "🏋️" },
+  { name: "Gorgany", discount: "15%", category: "sport", icon: "🏔️" },
+  { name: "Школа барабанів DrumHub", discount: "20%", category: "leisure", icon: "🥁", url: "https://drumhub.com.ua/" },
+  { name: "Інтертоп", discount: "20%", category: "shop", icon: "👟" },
+  { name: "Лабораторія Діла", discount: "25%", category: "health", icon: "🧪" },
+  { name: "Clean Master Kiev", discount: "50%", category: "services", icon: "🛋️", note: "Хімчистка меблів", url: "https://cleanmaster.kiev.ua/" },
+  { name: "Марчук хліб", discount: "20%", category: "leisure", icon: "🍞" },
+  { name: "Мастер зу", discount: "10%", category: "services", icon: "🐾", url: "https://masterzoo.ua/ua/" },
+  { name: "UkrArmor", discount: "10%", category: "shop", icon: "🛡️", url: "https://ukrarmor.com.ua/" },
+  { name: "New Balance", discount: "10%", category: "shop", icon: "👟" },
+  { name: "LiraSoul", discount: "50%", category: "beauty", icon: "💆", note: "Масаж", url: "https://www.instagram.com/lirasoul_kyiv/" },
+  { name: "DuDa", discount: "15%", category: "shop", icon: "🛒", note: "Магазин", url: "https://duda.com.ua/ua/znyzhka-dlya-viyskovykh/?utm_source=veteranam.info&utm_medium=referral&utm_campaign=discount" },
+  { name: "Green Forest", discount: "Безкоштовно", category: "leisure", icon: "🌿", note: "Безоплатні курси", url: "https://greenforest.com.ua/controlyourfuture?utm_source=veteranam&utm_medium=about&utm_campaign=cntrlf" },
+  { name: "Mandrogor", discount: "20%", category: "sport", icon: "🎒", note: "Туристичне спорядження", url: "https://shop.mandrogor.com.ua/" },
+  { name: "Doctor Sam", discount: "20%", category: "health", icon: "💊", url: "https://www.doctorsam.ua/" },
+  { name: "Wood Hotel Resort & Spa", discount: "30%", category: "leisure", icon: "🏔️", note: "Карпати", url: "https://wood-hotel.com.ua/" },
+  { name: "Чорноморка", discount: "20%", category: "leisure", icon: "🌊" },
+  { name: "Лазерхауз", discount: "30%", category: "beauty", icon: "✨" },
+  { name: "Barbershop Chub", discount: "40%", category: "beauty", icon: "💈", note: "Барбершоп", url: "https://barbershop-chub.com/" },
+];
+
+function createCard(item) {
+  const isReallyFree = item.discount === "Безкоштовно" || item.discount === "100%";
+  const badgeClass = isReallyFree ? "discount-badge free" : "discount-badge";
+  const label = item.discount === "Безкоштовно" ? "Безкоштовно" : item.discount;
+  const inner = `
+      <div class="card-top">
+        <div class="card-icon">${item.icon}</div>
+        <div class="${badgeClass}">${label}</div>
+      </div>
+      <div class="card-name">${item.name}</div>
+      ${item.note ? `<div class="card-category">${item.note}</div>` : ''}
+      ${item.url ? `<div class="card-link">Перейти на сайт ↗</div>` : ''}
+  `;
+  if (item.url) {
+    return `<a class="card card-linked" href="${item.url}" target="_blank" rel="noopener">${inner}</a>`;
+  }
+  return `<div class="card">${inner}</div>`;
+}
+
+function renderGrid(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items.length) {
+    el.innerHTML = '<div class="empty">Нічого не знайдено</div>';
+    return;
+  }
+  el.innerHTML = items.map(createCard).join('');
+}
+
+function init() {
+  renderGrid('grid-all', discounts);
+  const cats = ['health', 'sport', 'shop', 'beauty', 'leisure', 'services'];
+  cats.forEach(cat => {
+    renderGrid(`grid-${cat}`, discounts.filter(d => d.category === cat));
+  });
+}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+    document.getElementById('searchInput').value = '';
+    init();
+  });
+});
+
+// Search
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  const base = activeTab === 'all' ? discounts : discounts.filter(d => d.category === activeTab);
+  const filtered = q ? base.filter(d =>
+    d.name.toLowerCase().includes(q) ||
+    (d.note || '').toLowerCase().includes(q)
+  ) : base;
+  renderGrid(`grid-${activeTab}`, filtered);
+  if (activeTab === 'all') {
+    document.getElementById('count-all').textContent = filtered.length;
+  }
+});
+
+init();
+</script>
+</body>
+</html>
